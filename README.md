@@ -1,4 +1,4 @@
-# Burro Hotel Management System
+# Hotel Management System
 
 Prosta, ale w pełni funkcjonalna aplikacja konsolowa w Javie do zarządzania hotelem, zintegrowana z relacyjną bazą danych PostgreSQL. Projekt oparty na architekturze wielowarstwowej.
 
