@@ -7,7 +7,7 @@ public class Main {
         Hotel hotel = new Hotel("Grand Hotel", roomRepo);
         BookingService bookingService = new BookingService();
 
-        ConsoleUI ui = new ConsoleUI(hotel, bookingService, guestRepo, reservationRepo);
+        ConsoleUI ui = new ConsoleUI(hotel, bookingService, guestRepo, reservationRepo, roomRepo);
         ui.start();
     }
 }

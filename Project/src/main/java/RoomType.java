@@ -3,7 +3,8 @@ public enum RoomType {
     DOUBLE(2, 250.0),
     TRIPLE(3, 340.0),
     QUADRA(4, 420.0),
-    PENTA(5, 500.0);
+    PENTA(5, 500.0),
+    SUITE(2, 500.0);
 
     private final int maxCapacity;
     private final double roomPrice;

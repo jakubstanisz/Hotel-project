@@ -50,18 +50,21 @@ public class RoomRepository {
     }
 
     public void updateRoomAvailability(int roomNumber, boolean isAvailable) {
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            updateRoomAvailability(conn, roomNumber, isAvailable);
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void updateRoomAvailability(Connection conn, int roomNumber, boolean isAvailable) throws SQLException {
         String sql = "UPDATE rooms SET is_available = ? WHERE room_number = ?";
 
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setBoolean(1, isAvailable);
             pstmt.setInt(2, roomNumber);
 
             pstmt.executeUpdate();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
         }
     }
 }

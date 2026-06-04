@@ -8,14 +8,16 @@ public class ConsoleUI {
     private BookingService bookingService;
     private GuestRepository guestRepository;
     private ReservationRepository reservationRepository;
+    private RoomRepository roomRepository;
     private boolean running;
 
-    public ConsoleUI(Hotel hotel, BookingService bookingService, GuestRepository guestRepository, ReservationRepository reservationRepository) {
+    public ConsoleUI(Hotel hotel, BookingService bookingService, GuestRepository guestRepository, ReservationRepository reservationRepository, RoomRepository roomRepository) {
         this.scanner = new Scanner(System.in);
         this.myHotel = hotel;
         this.bookingService = bookingService;
         this.guestRepository = guestRepository;
         this.reservationRepository = reservationRepository;
+        this.roomRepository = roomRepository;
         this.running = true;
     }
 
@@ -26,7 +28,9 @@ public class ConsoleUI {
             System.out.println("\nWYBIERZ OPCJĘ:");
             System.out.println("1. Wyświetl dostępne pokoje");
             System.out.println("2. Dokonaj rezerwacji");
-            System.out.println("3. Wyjdź");
+            System.out.println("3. Anuluj rezerwację");
+            System.out.println("4. Wygeneruj raport finansowy gości ");
+            System.out.println("5. Wyjdź");
 
             int choice = -1;
             try {
@@ -69,33 +73,40 @@ public class ConsoleUI {
 
                         LocalDate startDate = LocalDate.now();
                         LocalDate endDate = startDate.plusDays(numberOfNights);
-
                         double totalCost = numberOfNights * selectedRoom.roomPrice();
 
                         System.out.println("Przetwarzanie rezerwacji dla " + firstName + " " + lastName + "...");
                         System.out.println("Całkowity koszt to: " + totalCost);
 
-                        int guestId = guestRepository.saveGuest(guest);
+                        boolean success = bookingService.makeReservationWithTransaction(
+                            guest, selectedRoom, startDate, endDate, totalCost,
+                            guestRepository, reservationRepository, roomRepository
+                        );
 
-                        if(guestId != -1) {
-                            guest.setId(guestId);
-
-                            Reservation reservation = new Reservation(selectedRoom, guest, startDate, endDate, totalCost);
-                            reservationRepository.saveReservation(reservation);
-
+                        if (success) {
                             selectedRoom.setAvailable(false);
-                            myHotel.updateRoomAvailability(selectedRoom.getNumber(), false);
-
-                            System.out.println("Rezerwacja zapisana pomyślnie w bazie danych!");
+                            System.out.println("Rezerwacja zapisana pomyślnie w bazie danych !");
                         } else {
-                            System.out.println("Błąd zapisu gościa do bazy.");
+                            System.out.println("Błąd zapisu rezerwacji. Wycofano zmiany.");
                         }
 
                     } else {
                         System.out.println("Błąd: Pokój nie istnieje lub jest zajęty!");
                     }
                     break;
+
                 case 3:
+                    System.out.println("Podaj numer ID rezerwacji do anulowania:");
+                    int resId = scanner.nextInt();
+                    scanner.nextLine();
+                    reservationRepository.cancelReservationTransaction(resId);
+                    break;
+
+                case 4:
+                    guestRepository.printGuestSpendingReport();
+                    break;
+
+                case 5:
                     System.out.println("Zamykanie systemu. Do widzenia!");
                     running = false;
                     break;
